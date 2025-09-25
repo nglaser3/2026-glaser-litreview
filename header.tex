@@ -1,0 +1,33 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Includes and setup %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Basic includes
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage[colorlinks=true, allcolors=black, linkcolor=blue]{hyperref}
+
+% Glossary
+\usepackage[nonumberlist]{glossaries}
+\loadglsentries{glossary}
+
+\makeglossaries
+
+% Bibliography
+\usepackage[backend=biber, style=numeric, url=false]{biblatex}
+\addbibresource{references.bib}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Graphics
+\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% Macros %%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\tocentry}[1]{
+    \addcontentsline{toc}{section}{#1}
+}
