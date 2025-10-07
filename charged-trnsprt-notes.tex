@@ -1,0 +1,131 @@
+\input{header}
+\addbibresource{transport.bib}
+
+\begin{document}
+
+\pagenumbering{gobble}
+\tableofcontents
+
+\clearpage
+\pagenumbering{roman}
+\tocentry{Glossary}
+\printglossary
+
+\clearpage
+\pagenumbering{arabic}
+\section{Deterministic Algorithms for High Accuracy Coupled Photon-Electron-Positron Transport in Radiation Therapy Planning}
+~\cite{bienvenue_deterministic_2024}
+
+This dissertation focuses on purely charged particle transport, specifically deterministic algorithms to solve the \gls{bfp}. Of particular interest are Chapters 1 (background on coupled particle transport) and 2 (coupled photon, electron, and positron mgxs)
+
+
+The \gls{sn} method is one of the more popular angular discretization techinques, particularly in nuclear engineering for neutron transport. There are serious limitation to this method however, when applied to highly forward-peaked scattering\ldots which is a dominant characteristic of charged particle transport. Only the time-independent \gls{bte} is used in this dissertation.
+
+\subsection{Boltzmann Transport Equation}
+The time-independent \gls{bte} is:
+
+\begin{subequations}
+    \begin{equation}
+        \solidangle\cdot\nabla\angularflux^p\phasespace
+        + \macroxs{t}^{p}\phasespace\angularflux^p\phasespace
+        =
+        Q_b^p\phasespace
+        + Q_{ext}^p\phasespace
+    \end{equation}
+    \begin{equation}
+        Q_b^p\phasespace
+        =
+        \sum_{p'\in P}\int_{4\pi} d\solidangle'\int_0^{\infty}d\energy'\macroxs{s}^{p'\rightarrow p}\phasespace\angularflux^{p'}\phasespace
+    \end{equation}
+    Where $p \in P := {\photon, \electron, \positron}$, and $\macroxs{}^{p'\rightarrow p}$ is the macroscopic double differential cross section of some particle $p'\incphasespace$ collisioning and producing particle $p\phasespace$.
+\end{subequations}
+
+\subsubsection{Angular and Energy Discretization}
+It is common to ignore the angular dependence of the total cross section, and to approximate the angular dependence of the boltzmann operator ($Q_b^p$) using spherical harmonic moments:
+
+\begin{subequations}
+    \begin{equation}
+        \solidangle\cdot\nabla\angularflux^p\phasespace
+        + \macroxs{t}^{p}\lessophasespace\angularflux^p\phasespace
+        =
+        Q_b^p\phasespace
+        + Q_{ext}^p\phasespace
+    \end{equation}
+    \begin{equation}
+        Q_b^p\phasespace
+        =
+        \sum_{p'\in P}\int_0^{\infty}d\energy'\sum_q^{N_q}\macroxs{s, \ell_q}^{p'\rightarrow p}\lessophasespace \realsph{q}(\solidangle)\scalarflux^p_{q}\lessophasespace
+    \end{equation}
+    \begin{equation}
+        \scalarflux^p{ q}\lessophasespace
+        =
+        \int_{4\pi}d\solidangle\realsph{q}(\solidangle)\angularflux^p\phasespace
+    \end{equation}
+\end{subequations}
+
+Then, applying the standard energy discretization:
+
+\begin{subequations}
+    \begin{equation}
+        \solidangle\cdot\nabla\angularflux^p{g}\lessephasespace
+        + \macroxs{t,g}^{p}(\position)\angularflux^p{g}\lessephasespace
+        =
+        Q_b^{p,g}\lessephasespace
+        + Q_{ext}^{p,g}\lessephasespace
+    \end{equation}
+    \begin{equation}
+        \macroxs{t,g}^p(\position)
+        =
+        \frac{1}{\Delta\energy_g}\int_{\energy_{g+1/2}}^{\energy_{g-1/2}}d\energy\macroxs{t}^p\lessophasespace
+    \end{equation}
+    \begin{equation}
+        \macroxs{s, \ell, g'\rightarrow g}^{p'\rightarrow p}(\position)
+        =
+        \frac{1}{\Delta_g}\int_{\energy_{g+1/2}}^{\energy_{g-1/2}}d\energy\macroxs{s, \ell, g'\rightarrow g}^{p'\rightarrow p}\lessophasespace
+    \end{equation}
+    \begin{equation}
+        \macroxs{s, \ell, g'\rightarrow g}^{p'\rightarrow p}\lessophasespace
+        =
+        2\pi\int_{\energy'_{g+1/2}}^{\energy'_{g-1/2}}d\energy'
+        \int_{-1}^1\legendre{\ell}(\mu)\macroxs{s}^{p'\rightarrow p}(\position, \energy'\rightarrow\energy,\mu)
+    \end{equation}
+\end{subequations}
+
+\subsection{Fokker-Planck Equation}
+The standard \gls{bte} is well suited for neutron transport, but is not for charged particles due to: Highly forward peaked scattering, scattering with atomic electrons, and small energy loss per scatter event (need a TON of energy groups to accurately capture slowing down). Assuming forward peaked scattering and small energy-loss processes, the fokker-planck variation of the \gls{bte} is derived. Look elsewhere for general derivation(~\cite{pomraning_higher_1996, beling_generalized_2023}) and high accuracy(~\cite{morel_fokker-planck_1981, uilkema_proton_2012}).
+
+The main idea of the Fokker-Planck Approximation is that the boltzmann operator (which  is integrable in angle) can be converted into the Fokker-Planck operator (differentiable in Angle / energy). Further, the Fokker-Planck operator can be linearly seperated into the Continuous Slowing Down operator, the Angular Fokker-Planck operator, and the Energy Straggling Operator (not shown here):
+
+\begin{subequations}
+    \begin{equation}
+        Q^p_{CSD}\phasespace = \pd{}{\energy}{}
+        \left[
+            S^p\lessophasespace\angularflux^p\phasespace
+        \right]
+    \end{equation}
+    \begin{equation}
+        Q^p_{AFP}\phasespace = T^p\lessophasespace
+        \left[
+            \pd{}{\mu}{}(1-\mu^2)\pd{}{\mu}{} + \frac{1}{1-\mu^2}\pd{}{\varphi}{2}
+        \right]
+        \angularflux^p\phasespace
+    \end{equation}
+    Where $S^p$ and $T^p$ are the stopping power and momentum transfer, respectively.
+\end{subequations}
+
+Limitations of this form of the boltzmann equation are that electrons and positrons often change direction when interacting, and these large angular changes also have large energy transfers -> going against the founding approximation of the Fokker-Planck equation.
+
+\subsection{Boltzmann Fokker-Planck Equation}
+The \gls{bfp} takes the Fokker-Plank equation, and seperate the scattering events into soft and catastrophic (small vs large angle/energy change).The catastrophic interactions are treated with the boltzmann operator, and the the soft are treated with the Fokker-Planck operator. This is a generalized form for the Boltzmann and Focker-Planck equations, allowing accurate results for general particle types (although potentially inneficient). It is important to note that the forms of each operator are the same, BUT the definitions for the macroscopic cross sections are completely different. 
+
+\subsection{Angular Discretization Techniques}
+\gls{sn}, \gls{pn}, and \gls{dgfem}.\ \gls{sn} is well suited for highly anisotropic scattering, but exhibits ray effects, \gls{sn} removes the ray effects, but is subject to ringing from expansion, and \gls{dgfem} removes all innacuracies but is painfully slow.\ \gls{sn} is the most performant, allowing for (trivial) angular and (non-trivial) spatial parallelization. 
+
+Cannot apply traditional first collision source method (which breaks the flux into two regimes, collided and uncollided, solving uncollided with low order \gls{sn}, and then using it as a source for collided using a full \gls{sn} solve) because ray tracing must be done in space AND energy for the \gls{bfp}. Electrons do not need ray mitigation strategies because they scatter (a lot), but photons do need mitigation.
+
+\clearpage
+\tocentry{References}
+\section*{References}
+\printbibliography[heading=none]
+
+\end{document}

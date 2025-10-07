@@ -15,11 +15,11 @@
 
 % Bibliography
 \usepackage[backend=biber, style=numeric, url=false]{biblatex}
-\addbibresource{references.bib}
 
 % Math
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{bm}
 
 % Graphics
 \usepackage{graphicx}
@@ -31,3 +31,45 @@
 \newcommand{\tocentry}[1]{
     \addcontentsline{toc}{section}{#1}
 }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% Math %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\solidangle}{\bm{\Omega}}
+\newcommand{\position}{\mathbf{r}}
+\newcommand{\energy}{E}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\angularflux}{\Psi}
+\newcommand{\scalarflux}{\mathrm{\phi}}
+\newcommand{\phasespace}{
+    \left(\position, 
+    \solidangle, 
+    \energy\right)
+    }
+\newcommand{\lessophasespace}{
+    \left(\position, 
+    \energy\right)
+}
+\newcommand{\lessephasespace}{
+    \left(\position, 
+    \solidangle\right)
+}
+\newcommand{\incphasespace}{
+    \left(\position, 
+    \solidangle', 
+    \energy'\right)
+}
+\newcommand{\transphasespace}{
+    \left(\position, 
+    \solidangle'\rightarrow\solidangle, 
+    \energy'\rightarrow\energy\right)
+}
+\newcommand{\macroxs}[1]{\Sigma_{#1}}
+\newcommand{\microxs}[1]{\sigma_{#1}}
+\newcommand{\realsph}[1]{R_{\ell_{#1}}^{m_{#1}}}
+\newcommand{\legendre}[1]{P_{#1}}
+\newcommand{\electron}{e^{-}}
+\newcommand{\positron}{e^{+}}
+\newcommand{\photon}{\gamma}
+\newcommand{\pd}[3]{\frac{\partial^{#3}#1}{\partial{#2}^{#3}}}

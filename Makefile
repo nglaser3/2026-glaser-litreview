@@ -1,4 +1,4 @@
-manuscript 	= vr-notes
+manuscript 	= charged-trnsprt-notes
 references 	= $(wildcard *.bib)
 latexopt 		= -file-line-error -halt-on-error
 
