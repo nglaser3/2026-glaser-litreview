@@ -123,6 +123,38 @@ The \gls{bfp} takes the Fokker-Plank equation, and seperate the scattering event
 
 Cannot apply traditional first collision source method (which breaks the flux into two regimes, collided and uncollided, solving uncollided with low order \gls{sn}, and then using it as a source for collided using a full \gls{sn} solve) because ray tracing must be done in space AND energy for the \gls{bfp}. Electrons do not need ray mitigation strategies because they scatter (a lot), but photons do need mitigation.
 
+\subsection{Particle Coupling and Solving}
+Coupling of particles is done by solving each particle individually, and then using the solution as a part of the source term for the next particle type to be solved. This iterative approach is solved until either some convergence criteria is met or some maximum number of 'generations' is conducted.
+
+For each \gls{bfp}, the charged particles $\{\photon, \electron, \positron\}$ are assumed (?) to not have any upscattering events. Thus, the multigroup transport equation is solved by sweeping from the highest energy group to the lowest, where each group is solved via \gls{si}. The angular flux is solved along each direction ($\solidangle_n$) via a directional sweep, similair to \gls{kba} style sweeps.
+
+\subsubsection{Convergence}
+The speed of convergence is governed by the spectral radius:
+\begin{equation}
+    \rho = \lim_{\ell\rightarrow\infty}
+    \frac{
+        \norm{\angularflux^{\ell} - \angularflux^{\ell-1}}
+    }
+    {
+        \norm{\angularflux^{\ell-1} - \angularflux^{\ell-2}}
+    }
+\end{equation}
+
+where $\ell$ is iteration number. Spectral radius of much less than 1 is fast convergence, near one is slow, and greater than or equal to 1 does not converge. Doing a Fourier analysis on the spectral radius shows the radius is given by the ratio of elastic scattering to total cross section, and thus for problems with high elastic scattering dominance, slow convergence occurs~\cite{larsen_advances_2010}. Unfortunately, $\electron$ and $\positron$ interactions are dominaed by elastic scattering, and so convergence for these particles can be extremely slow. Bienvenue identifies the most relevant acceleration method for specifically $\electron$ and $\positron$ transport to be the transport correction. 
+
+\paragraph{Transport Correction}
+This correction essentially moves much of the responsibility for the inelastic scattering kernel from the boltzmann operator to the Fokker-Planck operator. This is done because the Boltzmann operator is where the spectral radius limitation comes from, so as much of the inelastic scattering should be offloaded to the Fokker-Planck operator as can feasibly be done (without impacting the final result).
+
+\subsubsection{Acceleration}
+To reduce the number of iterations for highly forward peaked scattering problems, Bienvenue cites the diffusion synthetic acceleration (commonly used in neutral particle transport) is ineffective. A potentially promising acceleration method was developed for 1-D geometries, but may not work for multi-D~\cite{morel_angular_1991}. Bienvenue, for his dissertation, used Livolant acceleration, which is based on residual minimization, but directly calls out Kyrlov subspace methods (namely \gls{gmres} and \gls{gmresm}) as a potentially better acceleration method. 
+
+\gls{sn} is trivially parallelizable in angle, as each ordinate is independent, but can be a little trickier in space. If using a structure mesh however, \gls{kba} style sweeps are provably the fastest but is not trivial to implement.
+
+\subsection{Novel scheme for angular discretization of \gls{afp}}
+Novel scheme is based on Voronoi tessellation of unit sphere, and works with nonorthogonal quadrature sets. Also, is a monotone and moment preserving finite different scheme! Performs better than typical galerken scheme, and produces positive physical results! Very interesting, need to revisit!
+
+Includes a Gram-Schmidt orthogonalization algorithm for choosing suitable spherical harmonic moments.
+
 \clearpage
 \tocentry{References}
 \section*{References}
