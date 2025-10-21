@@ -156,6 +156,67 @@ Novel scheme is based on Voronoi tessellation of unit sphere, and works with non
 Includes a Gram-Schmidt orthogonalization algorithm for choosing suitable spherical harmonic moments.
 
 \clearpage
+\section{Advances in Discrete Ordinates Methodology}
+~\cite{larsen_advances_2010}
+This paper reviews the major advancements in \gls{sn} methodology that have been made since 1968. The purpose of this chapter is to present the major advancements, but also the new algorithms developed for \gls{sn} that have greatly enabled the advances. 
+
+Major concepts discussed are the original \gls{sn} method techniques published in 1968 (multigroup, \gls{sn} in angle, finite difference in space), \gls{sn} applications to advanced problems (charged particle transport), advanced spatial discretizations (MOC, DFEM, nodal), treatments of anisotropic scattering, curvilinear geometry (curved MOC rays? for magnetic fields), angular and energy discretizations for specifically charged particles, and advanced time discretizations. 
+
+Further, for algorithmic advancements (acceleration), \gls{dsa}, source-iteration for time dependent calculations, and upscatter acceleration. Also, the application of preconditioned Krylov methods to \gls{sn}. 
+
+Finally, the chapter ends with a discussion on (and identification of) future challenges facing \gls{sn}.
+
+\subsection{Basic concepts behind \gls{sn}}
+In order to describe coupled transport ($n, \gamma, \electron, \positron,\ldots$), a full system of coupled transport equations is required. A major problem for discretizations of the \gls{bte} is that while the equation itself provably has real, positive, solutions, the discretization scheme employed may not gaurantee this. 
+
+\subsubsection{Differential Scattering Cross Section}
+The differential scattering cross section, $\macroxs{s}\left(\position, \solidangle'\cdot\solidangle, \energy'\rightarrow\energy\right)$ is commonly written as an legendre expansion:
+
+\begin{equation}
+    \label{eq:sigmas_expansion}
+    \macroxs{s}\left(\position, \solidangle'\cdot\solidangle,\energy'\rightarrow\energy\right) = 
+    \sum_{m=0}^{\infty}\frac{2m + 1}{4\pi}P_m(\solidangle'\cdot\solidangle)\macroxs{s,m}\left(\position,\energy'\rightarrow\energy\right)
+\end{equation}
+
+\subsubsection{Time discretization}
+Most common method in 1968 (and today) is implicit euler, basically integrate from $t_{i-1/2} \rightarrow t_{i+1/2}$, then divide by $\Delta t = t_{i+1/2} - t_{i-1/2}$. Implicit Euler yields steady state equations to be solved at each timestep, and the ssolution of time step $i$ is used as the source on the rhs of time step $i+1$. Because the steady state solution with a positive source (ignoring truncation error from $\frac{\partial}{\partial t}$ approximation) is gauranteed positive, which is an ideal pro of this method. However, Implicit Euler is only first order accurate, and so truncation error can be very large given large timesteps. Because temporal discretizations break time dependence into a bunch of steady state problems that then get woven back together, the methods for solving the \gls{bte} are pretty much the same after temporal discretization. 
+
+\subsubsection{Energy discretization}
+Standarad multigroup, same as diffusion. Because left hand side of \gls{bte} is independent of other groups, the multigroup approximation forms a system of equations coupled only by the scattering and fission terms. The multigroup approximation is also inherently positive, gaurantee positive flux (again ignoring truncation).
+
+\subsubsection{Angular discretization}
+\gls{sn} works by breaking the angular domain into discrete bins called `ordinates', with some fractional area (or width) over whole angular domain. These bins are then prescribed expansion weights found from integrating the legendre expansion over the ordinate area (width). A little confused about after ordinate discretization, how to solve (just need clarification)? 
+
+Selection of quadrature set (how to break up angle into bins) is extremely important. For most 1-D problems, the even-order Gauss-Legendre quadrature sets are ideal, more complicated for multi-D. 
+
+\subsubsection{Spatial discretization}
+Break domain into cells, with unknowns being cell edge and cell average fluxs. This results in more unknowns than equations, and so diamon differencing has been employed. Diamond differencing yields positive fluxs iff cell size is sufficiently small, otherwise negative results can be reported. 
+
+\subsubsection{Solution methods}
+After discretization of all variables, the system can be expressed as $A\angularflux=q$, where q is the source vector, and $A$ is a matrix. This can be solved by direct inversion, however $A$ is usually prohibitively large such that direct inversion is intractable. Thus, alternative methods to approximate the solution must be used. These methods are iterative methods. 
+
+\paragraph{Source Iteration}
+The most common is source-iteration, which assumes the right hand side (the fission and scattering source terms) are known for each individual equation (node, time, group, ordinate), and then explicitly solves for the angular flux that way. The source term (scattering and fission) is then iteratively updated. Source iteration begins by applying an estimate to the scattering source term, typically zero. Using the estimated scattering source, the space and angle equations are solved by a transport sweep. The angular flux results from this sweep are then used in the scattering source term for the next iteration, and this is repeated until convergence. Source iteration is valid for scattering media, as without scattering the source iteration makes no sense (the `source' is updated in scattering term). If the scattering media is optically thin (few scatter interactions) the source iteration scheme will converge rapidly. If the scattering media is optically thick with \textbf{weak absorption}, then the source iteration scheme will converge slowly. The source iteration convergence is directly correlated to how many collision histories a given particle will generate in the problem media, and so when there are more collision histories, source iteration will need a bunch of histories to approximate real behavior. 
+
+For multigroup with no upscattering, the source iteration scheme is iterated beginning with g=1 until convergence, and then this flows down (solving each consequent g). For multigroup with upscattering, the problem is solved by approximating the upscattering source term in each group as zero, and then iteratively solving as if there is no upscattering. Then, the resulting group angular fluxs are then used to update the upscattering source term in each group, and then the problem is repeated, assuming that the upscattering source in each group is unchanged. This then results in new angular fluxes, which are then used to update the upscattering source term, and the problem is then solved again assuming upscattering source terms are not changing. This process is done until convergence, or until a user specified maximum number of iterations. This process is called `outer iteration', and will converge rapidly iff the upscattering probability is small. If upscattering probability is high, this will converge slowly. 
+
+The accuracy of this method can be measured via the spectral radius, which is essentially the relative difference between iterations:
+
+\begin{equation}
+    \rho = \lim_{i\rightarrow\infty}\frac{\norm{\angularflux^i - \angularflux^{i-1}}}{\norm{\angularflux^{i-1} - \angularflux^{i-2}}}
+\end{equation}
+
+The smaller $\rho$, the faster convergence (as the relative difference is closer to 0). Fourier analysis on one group transport in infinite homogenous medium has:
+
+\begin{equation}
+    \rho = \frac{\Sigma_s}{\Sigma_t}
+\end{equation}
+
+Source iteration is gauranteed to converge, but for many important problems it converges slowly. 
+
+\subsection{Charged Particle Transport}
+
+\clearpage
 \tocentry{References}
 \section*{References}
 \printbibliography[heading=none]

@@ -19,6 +19,6 @@ Charged Particle Transport Papers
 | Higher Order Fokker-Planck Operators | Pomraning | X | | | |
 | Generalized Fokker-Planck Approximations for Fast-Ion Slowing Down | Frank et. al. | X | | | |
 | Solution of the electron continuity equation in an inhomogeneous medium via the method of characteristics | Craig et. al. | X | | | |
-| Advances in Discrete-Ordinates Methodology | Larsen et. al. | X | | | |
+| Advances in Discrete-Ordinates Methodology | Larsen et. al. | | X | | |
 | An Angular Multigrid Acceleration Technique for Sn Equations with Highly Forward-Peaked Scattering | Morel et. al. | X | | | |
 | Assessing Nonlinear Diffusion Acceleration for Boltzmann Fokker Planck Equation in Slab Geometry | Patel et. al. | X | | | |
