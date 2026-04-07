@@ -215,7 +215,55 @@ The smaller $\rho$, the faster convergence (as the relative difference is closer
 Source iteration is gauranteed to converge, but for many important problems it converges slowly. 
 
 \subsection{Charged Particle Transport}
+The \gls{bfp}, ignoring the time derivative and secondary particle production term, is 
+\begin{equation}
+    \solidangle\cdot\nabla\angularflux + \macroxs{t,sm}\angularflux
+    =
+    \int_0^{\infty}d\energy'\int_{4\pi}d\solidangle'\macroxs{s,sm}\left(\solidangle'\cdot\solidangle,\energy'\rightarrow\energy\right)\angularflux\left(\solidangle',\energy'\right)
+    +\frac{\macroxs{r,tr}}{2}\left\{\frac{\partial}{\partial\mu}\left[\left(1-\mu^2\right)\frac{\partial}{\partial\mu}\right] + \frac{1}{1-\xi^2}\frac{\partial^2}{\partial\omega^2}\right\}\angularflux
+    +\frac{\partial}{\partial\energy}\Beta_r\angularflux + q
+\end{equation}
 
+Where $\macroxs{\text{\textunderscore},sm}$ is the `smooth' cross section, $\macroxs{r,tr}$ is the restricted transport corrected scattering cross section (or restricted momentum transfer), and $\Beta_r$ is the restricted stopping power. $\mu$ is cosine of polar angle, and $\omega$ is azimuthal angle. 
+
+In this equation, the complete scatterig operator has been decomposed into `smooth' and `singular' components. The smooth component is the the integral, whereas the singular components are the differentials in angle and energy. The Fokker-Planck operators are `restricted' because each is restricted to one component of the scattering (angular differential is change of angle, and energy differential is energy loss, both are singular components of double differentiable scattering cross section). 
+
+The angular differential term is called the `continuous scattering operator', and represents the asymptotic limit of scattering where scatering cross section tends to infinity, such that the average cosine of scattering angle tends to 1 (purely forward scattering). This means the momentum transfer $\alpha=\macroxs{s}(1-\bar{\mu}_0)$ is constant. The continuous scattering operator is the laplacian on the unit sphere (ignoring radius), and as such the effective diffusion coefficient is $\frac{\macroxs{r,tr}}{2}$.
+
+The energy differential operator is the `continuous slowing down operator', and represented the asymptotic limit of scattering where the average energy loss per scatter tends to zero, where the stopping power $\Beta=\macroxs{s}\bar{\Delta\energy}$ remains constant. 
+
+Charged particle transport is more challenging than standard neutron \gls{bte} solving:
+\begin{enumerate}
+    \item Because scattering cross section is highly forward peaked, Legendre expansions can require a large number of terms (1000s?) to converge.
+    \item Scattering / total can be close to unity, seriously slowing source iteration
+    \item Diffusion synthetic acceleration improves convergence, but does not bound spectral radius away from unity
+    \item High order legendre moments of angular flux need to be accelerated to bound spectral radius away from unity
+    \item Multigroup results in `numerical diffusion' (artificial smoothing of energy spectra), which results in loss of accuracy. Higher order energy methods fix the loss of accuracy but are slow/hard to converge. 
+    \item Strong boundary layers when considering secondary particle generation: Such as between high and low Z materials
+    \item Multiscale in length between different particle types. Photons can have meters of mfp, whereas electrons can be microns. 
+\end{enumerate}
+
+\subsubsection{Important Advancements for Charged Particle Transport}
+The use of \gls{dfem} in both space and energy is essential. Spatial \gls{dfem} discretization methods are useful as they can calculate bulk energy deposition without resolving boundary layers. Energy \gls{dfem} discretization methods are significantly more accurate than multigroup discretizations when concerned with energy spectra, or when energy/charge deposition are important. Galerkin quadratures are usable for highly anisotropic scattering.
+
+\subsection{Advances in Spatial Discretization}
+\subsubsection{Characteristic Methods}
+\paragraph{Short Characteristics}
+On each spatial cell, $\scalarflux$ and $Q$(source) are approximated as a low-order polynomial. The leakage + collision operator ($\mu_m\frac{d}{dx}+\macroxs{t}$) is mathematically inverted. In multi-D, the inversion requires integration along a characteristic line of the transport equation. The resulting analytic expression for $\angularflux$ is manipulated to produce a polynomial representation, and when combined with the results from the other `directions of flight', yield a polynomial expression for $\scalarflux$. 
+
+The above is called `step characteristics', and should be investigated seperate from this brief overview.  
+\paragraph{Long Characteristics}
+Based on the integral form of the transport equation, and solutions utilize ray-tracing scheme scheme of particle paths through geometry. 
+
+\subsubsection{Solution in Optically Thick Spatial Cells}
+Solutions are gauranteed to be accurate when the spatial discretization yields optically thin cells ($\macroxs{t}\Delta x<<1$), however this level of discretization for charged particle transport is memory and computationally intractable. Fortunately, because charged particle transport uses the Fokker-Planck limits, the spatial scale lengths for the associated solution at these limits is much larger than a mean free path ($\macroxs{t}\Delta x >> 1$), and so the accuracy of a solution does not require optically thin cells. It is reasonable to expect to yield an accurate solution when using a mesh that does not resolve all cells to optically thin, so long as the mesh resolves the solution spatial scale. To determine if an accurate result can be obtained using optically thick cells (that resolves the spatial scale of the solution) you must use discrete asymptotic analysis. 
+
+For charged particle transport, the main thing to worry about is the highly anisotropic scattering treatment in the the Fokker-Planck limit. 
+
+\subsection{Advances in Angular Discretization}
+Legendre expansion for the scattering cross section and quadrature generated spherical harmonic moments of the angular flux are still the main method for modern \gls{sn} codes. Although this method can be bad for highly anisotropic scattering, it is still used because: (1) fundamentally different approaches require lots of raw cross section processing\dots, (2) legendre expansions and spherical harmonic moments require much less memory than alternatives, and (3) the standard tecniqhue is typically more accurate than expected (even with poor cross-section expansions). 
+
+The standard method utilizes the fact that legendre, and by extension spherical harmonics, are eigenfunctions of the boltzmann operator. 
 \clearpage
 \tocentry{References}
 \section*{References}

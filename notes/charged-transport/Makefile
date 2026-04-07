@@ -4,6 +4,7 @@ latexopt 		= -file-line-error -halt-on-error
 
 all: $(manuscript).tex $(references)
 	pdflatex $(latexopt) $(manuscript).tex
+	makeglossaries $(manuscript)
 	biber $(manuscript)
 	pdflatex $(latexopt) $(manuscript).tex
 	pdflatex $(latexopt) $(manuscript).tex
